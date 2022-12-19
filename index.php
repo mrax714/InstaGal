@@ -1,4 +1,7 @@
-<?
+<?php
+$u = '';
+$title = 'Instagal';
+$ls = '';
 if (isset($_GET['u']))
 {
     $u = $_GET['u'];
@@ -7,16 +10,21 @@ if (isset($_GET['u']))
     {
         mkdir($ud, 0777, true);
         header("location: ./");
-        //exit;
-        
+        exit;
     }
-
     $title = $u;
 }
 else
 {
-    $title = 'Instagal';
+
 }
+
+$media = 'jpg';
+if (isset($_GET['media']))
+{
+    $media = $_GET['media'];
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -33,12 +41,12 @@ else
 	<body>
 <div class="grid">
 <div class="col_12 center">
- <h1><a href='./'>Users</a><?php if (isset($_GET['u']))
+ <h1><a href='./'>Home</a> <?php if (isset($_GET['u']))
 {
     echo " - " . $_GET['u'];
 } ?></h1>
 
-
+<div id="addUser" style="display:none;">
 <form method='get'>
 					<label for="fname">@</label>
 					<input type="text" id="u" name="u" value="<?php echo $u; ?>" onfocus="this.value=''"/>
@@ -48,7 +56,7 @@ else
 
 
 				</form>
-
+</div>
 
 <?php
 if (isset($_GET['u']))
@@ -67,7 +75,7 @@ if (isset($_GET['u']))
 
     // (C) OUTPUT IMAGES
     // (A) GET IMAGES & VIDEOS
-    $media = glob("img/$u/*.{jpg,jpeg,gif,png,mp4,json,txt}", GLOB_BRACE);
+    $media = glob("img/$u/*.$media", GLOB_BRACE);
     foreach ($media as $i)
     {
         //echo"$i<br>";
@@ -79,21 +87,19 @@ if (isset($_GET['u']))
             $us = $match[1];
             $id = $match[2];
             $ex = $match[3];
-            if (in_array($ex, array(
-                'jpg',
-                'mp4'
-            )))
-            {
-                $sets[$us][$id][$ex] = $i;
-            }
+
+            $sets[] = $i;
+
         }
+
     }
-    $cnt = count($sets[$us]);
+    $cnt = count($sets);
     $l = 10;
     $ps = ceil($cnt / $l);
     $start = ($page - 1) * $l;
     $stop = $start + $l;
-    $ls = '';
+    $ls .= "<a class='button' href='?u=$u&media=jpg'>Images</a> ";
+    $ls .= "<a class='button' href='?u=$u&media=mp4'>Videos</a> ";
     $i = 1;
     while ($i <= $ps)
     {
@@ -104,51 +110,26 @@ if (isset($_GET['u']))
 ?><div class="col_12"><?php
     $i = 0;
     // (B) OUTPUT HTML
-    foreach ($sets[$u] as $id => $item)
+    $media = 'jpg';
+    if (isset($_GET['media']))
+    {
+        $media = $_GET['media'];
+    }
+
+    foreach ($sets as $id => $item)
     {
         if ($i > $start && $i < $stop)
         {
             echo "<div class='col_12 center'>";
-
-            foreach ($item as $k2 => $v2)
+            if ($media == 'jpg')
             {
-                //echo"$k2=$v2";
-                $$k2 = $v2;
+                echo ("<a href='dl.php?u=$item'><img style='height:' title='' alt='' src='$item'><p></p></a>");
             }
-            $txt = str_replace(array(
-                '.mp4',
-                '.jpeg',
-                '.jpg'
-            ) , '.txt', $jpg);
-            $a = array();
-            if (isset($json))
+            else
             {
-                $a = jarray($json);
-            }
-
-            $t = @file_get_contents($txt);
-            if (isset($item['mp4']))
-            {
-                echo ("<video poster='$jpg' src='$mp4' controls width='100%'  preload='metadata'></video><p>$t</p>");
+                echo ("<video src='$item' controls width='100%'  preload='metadata'></video><p></p>");
 
             }
-            elseif (isset($item['jpg']))
-            {
-            	$pic='';
-                if (isset($a['node']['display_resources']))
-                {
-                    $pic = end($a['node']['display_resources'])['src'];
-                }
-                $full = $pic;
-                $full = $jpg;
-                echo ("<div class='col_12 center'><a href='dl.php?u=$full'><img style='height:' title='$t' alt='$t' src='$full'><p>$t</p></a>");
-            }
-
-            echo '<pre class="left">';
-
-            echo '</pre>';
-            echo '</div>';
-
         }
         $i++;
     }
@@ -159,17 +140,15 @@ else
     {
         $ps = glob($i . '*profile_pic*');
         $u = basename($i);
-        $p = $ps[0];
-        if (!file_exists($p))
+
+        if (isset($ps[0]))
         {
-            $p = 'empty.webp';
+            $p = $ps[0];
+            printf("<div class='col_12 center'><a href='?u=$u'><img class='full-width' src='%s'><h1>$u</h1></a></div>", $p);
         }
-        printf("<div class='col_12 center'><a href='?u=$u'><img class='full-width' src='%s'><h1>$u</h1></a></div>", $p);
 
     }
-
 }
-
 ?></div>
 <?php
 echo $ls;
