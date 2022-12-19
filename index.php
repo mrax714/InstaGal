@@ -53,7 +53,7 @@ else
 <?php
 if (isset($_GET['u']))
 {
-    require ('../inc/func.php');
+    require ('func.php');
 
     $page = 1;
     if (isset($_GET['p']))
