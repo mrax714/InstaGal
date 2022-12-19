@@ -67,7 +67,7 @@ if (isset($_GET['u']))
 
     // (C) OUTPUT IMAGES
     // (A) GET IMAGES & VIDEOS
-    $media = glob("img/$u/*.{jpg,jpeg,gif,png,bmp,webp,mp4,json,txt}", GLOB_BRACE);
+    $media = glob("img/$u/*.{jpg,jpeg,gif,png,mp4,json,txt}", GLOB_BRACE);
     foreach ($media as $i)
     {
         //echo"$i<br>";
@@ -79,10 +79,16 @@ if (isset($_GET['u']))
             $us = $match[1];
             $id = $match[2];
             $ex = $match[3];
-            $sets[$us][$id][$ex] = $i;
+            if (in_array($ex, array(
+                'jpg',
+                'mp4'
+            )))
+            {
+                $sets[$us][$id][$ex] = $i;
+            }
         }
     }
-    $cnt = count($sets[$u]);
+    $cnt = count($sets[$us]);
     $l = 10;
     $ps = ceil($cnt / $l);
     $start = ($page - 1) * $l;
@@ -114,19 +120,26 @@ if (isset($_GET['u']))
                 '.jpeg',
                 '.jpg'
             ) , '.txt', $jpg);
-            $a = jarray($json);
+            $a = array();
+            if (isset($json))
+            {
+                $a = jarray($json);
+            }
+
             $t = @file_get_contents($txt);
             if (isset($item['mp4']))
             {
-                //echo("<video poster='$jpg' src='$mp4' controls width='100%'  preload='metadata'></video><p>$t</p>");
-                
+                echo ("<video poster='$jpg' src='$mp4' controls width='100%'  preload='metadata'></video><p>$t</p>");
+
             }
-            else
+            elseif (isset($item['jpg']))
             {
-
-                $pic = end($a['node']['display_resources']);
-
-                $full = $pic['src'];
+            	$pic='';
+                if (isset($a['node']['display_resources']))
+                {
+                    $pic = end($a['node']['display_resources'])['src'];
+                }
+                $full = $pic;
                 $full = $jpg;
                 echo ("<div class='col_12 center'><a href='dl.php?u=$full'><img style='height:' title='$t' alt='$t' src='$full'><p>$t</p></a>");
             }
@@ -174,4 +187,3 @@ $('video').bind('play', function (e)
     }
 });
 </script>
-
