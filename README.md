@@ -4,4 +4,4 @@ Automatically download user profiles and display in website.
 
 Dependencies
   - <a href='https://instaloader.github.io/'>instaloader</a>
-  - php-curl
+  - <a href='https://www.php.net/manual/en/curl.setup.php'>php-curl</a>
